@@ -1,4 +1,4 @@
-  # Proyecto de Syncronización de Servicio REST ArcGIS Online con base de datos local usando ArcPY
+# Proyecto de Syncronización de Servicio REST ArcGIS Online con base de datos local usando ArcPY
 
 Se sincroniza día a día los servicios REST con una GeoDatabase en Oracle.
 

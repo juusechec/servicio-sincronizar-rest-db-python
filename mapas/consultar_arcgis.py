@@ -18,6 +18,7 @@ load_src("arcgisme", "../repo/arcgis/arcgis.py")
 
 import arcgisme
 import os
+import time
 
 service = None
 
@@ -34,19 +35,30 @@ def consultar_features(username, password):
     )
 
     layer_id = 0
-    geojson = service.get(layer_id, where="CreationDate >= '01-31-2017 00:00:00'")
+    today = time.strftime("%m-%d-%Y")
+    # OJO: Hay que tener en cuenta la hora en que se ejecuta cada script,
+    # en determinado caso no se ejecuta el mismo dia de los datos si no
+    # en una fecha posterior u anterior.
+    #print("today", str(today))
+    #statement = "CreationDate >= '01-31-2017 00:00:00'"
+    #statement = "CreationDate >= '" + str(today) + " 00:00:00'"
+    statement = "CreationDate >= '02-02-2017 00:00:00'"
+    print("statement", statement)
+    geojson = service.get(layer_id, where=statement)
+    if(len(geojson) == 0): # No devuelve resultados
+        return False
     return geojson["features"]
 
 def consultar_attachment(objectId, username, password):
     print("Consultando segundo servicio...")
-    source2 = "http://services3.arcgis.com/ry5R3Rlqp1fSnwj4/arcgis/rest/services/survey123_f2aeed2a8d3242d4a2a0b5337d692676/FeatureServer/"
+    base_url = "http://services3.arcgis.com/ry5R3Rlqp1fSnwj4/arcgis/rest/services/survey123_f2aeed2a8d3242d4a2a0b5337d692676/FeatureServer"
     service2 = arcgisme.ArcGIS(
-        source2,
+        base_url,
         username=username,
         password=password
     )
-
-    service_url = "http://services3.arcgis.com/ry5R3Rlqp1fSnwj4/arcgis/rest/services/survey123_f2aeed2a8d3242d4a2a0b5337d692676/FeatureServer/0/queryAttachments"
+    layer_id = 0
+    service_url = base_url + "/" + str(layer_id) + "/queryAttachments"
     #objectIds=1613&globalIds=&definitionExpression=&attachmentTypes=&size=&resultOffset=&resultRecordCount=&f=pjson&token=
 
     resultObjectId = objectId
@@ -61,12 +73,22 @@ def consultar_attachment(objectId, username, password):
         "f": "pjson"
     }
     geojson = service2.get_custom(service_url, params)
+    if len(geojson["attachmentGroups"]) == 0: # No hay attachments
+        return False
+    # Solo se selecciona el primer attachment
     attachment = geojson["attachmentGroups"][0]["attachmentInfos"][0]
     attachmentId = attachment["id"]
-    print("queryAttachments", attachment)
+    #print("queryAttachments", attachment)
 
-    image_url = "http://services3.arcgis.com/ry5R3Rlqp1fSnwj4/ArcGIS/rest/services/survey123_f2aeed2a8d3242d4a2a0b5337d692676/FeatureServer/0/" + str(resultObjectId) + "/attachments/" + str(attachmentId)
+    image_url = base_url + "/" + str(layer_id) + "/" + str(resultObjectId) + "/attachments/" + str(attachmentId)
+    #return image_url
+    token = str(service2.token)
+    print("Token = ", token)
+    image_url_token = image_url + "?token=" + token
     print("image_url", image_url)
+    return image_url_token
+def consultar_arcgis_hoy():
+    return consultar_arcgis()
 
 def consultar_arcgis():
     username = os.getenv('ARCGIS_USERNAME', None)
@@ -78,11 +100,15 @@ def consultar_arcgis():
 
     features = consultar_features(username, password)
     #print("features", features)
+    if features == False:
+        return False
+    new_features = []
     for feature in features:
         print("feature.properties.objectId", feature["properties"]["ObjectId"])
         objectId = str(feature["properties"]["ObjectId"])
         attachment = consultar_attachment(objectId, username, password)
-        print(attachment)
-
-    return 0
+        print("attachment", attachment)
+        feature["attachment"] = attachment
+        new_features.append(feature)
+    return new_features
     #return len(geojson["features"])

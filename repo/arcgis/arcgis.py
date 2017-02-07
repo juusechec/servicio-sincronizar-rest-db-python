@@ -110,7 +110,7 @@ class ArcGIS:
 
         if self.token:
             params['token'] = self.token
-        
+
         response = requests.get(url, params=params)
         return response.json()
 
