@@ -40,10 +40,10 @@ func execScript() {
 }
 
 func main() {
-  execScript()
+  //execScript()
   fmt.Println("Se carga servicio CRON... https://godoc.org/github.com/robfig/cron")
 	c := cron.New()
-	c.AddFunc("@every 12h0m", execScript)
+	c.AddFunc("0 0 12 * * *", execScript)
 	c.Start()
   for {
   }

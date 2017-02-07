@@ -1,25 +1,21 @@
-  # Proyecto de Generación de reportes con python
+  # Proyecto de Syncronización de Servicio REST ArcGIS Online con base de datos local usando ArcPY
 
-Se generan reportes PDF a partir de la implementación REST de los servicios de arcgis server o arcgis online.
+Se sincroniza día a día los servicios REST con una GeoDatabase en Oracle.
 
 # Dependencias
 
-- Python >= 3.5
+- Python >= 2.7
 - python-arcgis-rest-query
-- Flask *
 
-# Instalación dependencias Centos 7
+# Instalación dependencias Windows 10
 ```bash
-wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-bash Miniconda3-latest-Linux-x86_64.sh # a todo sí
-pip install flask
-pip install python-docx
-sudo yum install -y libreoffice
+pip install requests
 ```
 
 # Pasos de instalación
 
-1) Instalar una de las dependencias: (escriba los comandos preferiblemente en git-bash)
+1) Instalar una de las dependencias: (escriba los comandos preferiblemente en git-bash),
+no haga esto si ya tiene el directorio repo con los archivos.
 
 ```bash
 cd reportes-python # entrar al directorio descargado
@@ -27,6 +23,9 @@ git clone https://github.com/Schwanksta/python-arcgis-rest-query repo
 ```
 
 2) Establece las variables de entorno para el usuario y el password de arcgis online:
+
+- En Windows (Interfaz gráfica):
+Siga los pasos del sitio https://kb.wisc.edu/cae/page.php?id=24500
 
 - En Windows (cmd):
 
@@ -41,22 +40,15 @@ $env:ARCGIS_USERNAME = "usuario_arcgis_online"
 $env:ARCGIS_PASSWORD = "clave_arcgis_online"
 ```
 
-- En GNU/Linux:
-
-```bash
-export ARCGIS_USERNAME='usuario_arcgis_online'
-export ARCGIS_PASSWORD='clave_arcgis_online'
-```
-Opcionalmente agrega esas líneas en el ***~/.bashrc***
-
 3) Cree unos directorios necesarios para el despliegue:
 ```bash
 mkdir imagenes
-mkdir documentos
 ```
 
-4) Ejecutar el webservice:
+4) Ejecutar la sincronización (powershell, bash):
 
 ```bash
-python3 webservice.py
+C:\Python27\ArcGIS10.4\python.exe E:\Users\jorge\Documents\acueducto\servicio\sincronizar.py
 ```
+
+5) Ejecutar la sincronización con CRON programa en GO (https://golang.org/), se abre el ejecutable ***runservice.exe***.
